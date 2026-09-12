@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Sistema Universidad</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .contenedor {
+            width: 700px;
+            margin: auto;
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        h2 {
+            margin-top: 30px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #333;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #ddd;
+        }
+
+        .oculto {
+            display: none;
+        }
+
+        .mensaje {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="contenedor">
+
+    <h1>Sistema Universidad</h1>
+
+    <!-- SELECCIONAR TIPO -->
+
+    <h2>Registrar persona</h2>
+
+    <label>Seleccione qué desea registrar:</label>
+
+    <select id="tipo" onchange="mostrarFormulario()">
+
+        <option value="">Seleccione una opción</option>
+
+        <option value="estudiante">
+            Estudiante
+        </option>
+
+        <option value="catedratico">
+            Catedrático
+        </option>
+
+    </select>
+
+
+    <!-- FORMULARIO -->
+
+    <div id="formulario" class="oculto">
+
+        <label>Nombre:</label>
+
+        <input type="text" id="nombre">
+
+
+        <label>Fecha de nacimiento:</label>
+
+        <input type="date" id="fechaNacimiento">
+
+
+        <label>Género:</label>
+
+        <select id="genero">
+
+            <option value="">
+                Seleccione
+            </option>
+
+            <option value="Masculino">
+                Masculino
+            </option>
+
+            <option value="Femenino">
+                Femenino
+            </option>
+
+        </select>
+
+
+        <label>Correo:</label>
+
+        <input type="email" id="correo">
+
+
+        <!-- CAMPO ESTUDIANTE -->
+
+        <div id="campoCarnet" class="oculto">
+
+            <label>Carnet:</label>
+
+            <input type="number" id="carnet">
+
+        </div>
+
+
+        <!-- CAMPO CATEDRATICO -->
+
+        <div id="campoCodigo" class="oculto">
+
+            <label>Código:</label>
+
+            <input type="number" id="codigo">
+
+        </div>
+
+
+        <button onclick="guardar()">
+            Guardar
+        </button>
+
+        <p id="mensaje" class="mensaje"></p>
+
+    </div>
+
+
+    <!-- LISTA DE ESTUDIANTES -->
+
+    <h2>Lista de estudiantes</h2>
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>Carnet</th>
+                <th>Nombre</th>
+                <th>Género</th>
+                <th>Correo</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody id="listaEstudiantes">
+
+        </tbody>
+
+    </table>
+
+
+    <!-- LISTA DE CATEDRATICOS -->
+
+    <h2>Lista de catedráticos</h2>
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Género</th>
+                <th>Correo</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody id="listaCatedraticos">
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<script>
+
+    // =========================================
+    // UNIVERSIDAD
+    // =========================================
+
+    let universidad = {
+
+        nombre: "Universidad Mariano Gálvez",
+
+        direccion: "Guatemala",
+
+        estudiantes: [],
+
+        catedraticos: []
+
+    };
+
+
+    // =========================================
+    // CARGAR DATOS DE SESSION
+    // =========================================
+
+    let datosGuardados = sessionStorage.getItem("universidad");
+
+    if (datosGuardados != null) {
+
+        universidad = JSON.parse(datosGuardados);
+
+    }
+
+
+    // =========================================
+    // MOSTRAR FORMULARIO
+    // =========================================
+
+    function mostrarFormulario() {
+
+        let tipo = document.getElementById("tipo").value;
+
+        let formulario = document.getElementById("formulario");
+
+        let campoCarnet = document.getElementById("campoCarnet");
+
+        let campoCodigo = document.getElementById("campoCodigo");
+
+
+        if (tipo == "") {
+
+            formulario.classList.add("oculto");
+
+            return;
+
+        }
+
+
+        formulario.classList.remove("oculto");
+
+
+        if (tipo == "estudiante") {
+
+            campoCarnet.classList.remove("oculto");
+
+            campoCodigo.classList.add("oculto");
+
+        }
+
+
+        if (tipo == "catedratico") {
+
+            campoCodigo.classList.remove("oculto");
+
+            campoCarnet.classList.add("oculto");
+
+        }
+
+    }
+
+
+    // =========================================
+    // GUARDAR
+    // =========================================
+
+    function guardar() {
+
+        let tipo = document.getElementById("tipo").value;
+
+        let nombre = document.getElementById("nombre").value;
+
+        let fechaNacimiento =
+            document.getElementById("fechaNacimiento").value;
+
+        let genero =
+            document.getElementById("genero").value;
+
+        let correo =
+            document.getElementById("correo").value;
+
+
+        if (nombre == "" ||
+            fechaNacimiento == "" ||
+            genero == "" ||
+            correo == "") {
+
+            alert("Complete todos los campos");
+
+            return;
+
+        }
+
+
+        // =====================================
+        // ESTUDIANTE
+        // =====================================
+
+        if (tipo == "estudiante") {
+
+            let carnet =
+                document.getElementById("carnet").value;
+
+
+            if (carnet == "") {
+
+                alert("Ingrese el carnet");
+
+                return;
+
+            }
+
+
+            let estudiante = {
+
+                nombre: nombre,
+
+                fechaNacimiento: fechaNacimiento,
+
+                genero: genero,
+
+                correo: correo,
+
+                carnet: carnet
+
+            };
+
+
+            universidad.estudiantes.push(estudiante);
+
+        }
+
+
+        // =====================================
+        // CATEDRATICO
+        // =====================================
+
+        if (tipo == "catedratico") {
+
+            let codigo =
+                document.getElementById("codigo").value;
+
+
+            if (codigo == "") {
+
+                alert("Ingrese el código");
+
+                return;
+
+            }
+
+
+            let catedratico = {
+
+                nombre: nombre,
+
+                fechaNacimiento: fechaNacimiento,
+
+                genero: genero,
+
+                correo: correo,
+
+                codigo: codigo
+
+            };
+
+
+            universidad.catedraticos.push(catedratico);
+
+        }
+
+
+        // =====================================
+        // GUARDAR EN SESSION
+        // =====================================
+
+        sessionStorage.setItem(
+            "universidad",
+            JSON.stringify(universidad)
+        );
+
+
+        document.getElementById("mensaje").innerHTML =
+            "Registro agregado correctamente";
+
+
+        limpiarFormulario();
+
+        mostrarListas();
+
+    }
+
+
+    // =========================================
+    // LIMPIAR FORMULARIO
+    // =========================================
+
+    function limpiarFormulario() {
+
+        document.getElementById("nombre").value = "";
+
+        document.getElementById("fechaNacimiento").value = "";
+
+        document.getElementById("genero").value = "";
+
+        document.getElementById("correo").value = "";
+
+        document.getElementById("carnet").value = "";
+
+        document.getElementById("codigo").value = "";
+
+    }
+
+
+    // =========================================
+    // MOSTRAR LISTAS
+    // =========================================
+
+    function mostrarListas() {
+
+
+        // =====================================
+        // ESTUDIANTES
+        // =====================================
+
+        let tablaEstudiantes =
+            document.getElementById("listaEstudiantes");
+
+
+        tablaEstudiantes.innerHTML = "";
+
+
+        universidad.estudiantes.forEach(function(estudiante) {
+
+            tablaEstudiantes.innerHTML += `
+
+                <tr>
+
+                    <td>${estudiante.carnet}</td>
+
+                    <td>${estudiante.nombre}</td>
+
+                    <td>${estudiante.genero}</td>
+
+                    <td>${estudiante.correo}</td>
+
+                </tr>
+
+            `;
+
+        });
+
+
+        // =====================================
+        // CATEDRATICOS
+        // =====================================
+
+        let tablaCatedraticos =
+            document.getElementById("listaCatedraticos");
+
+
+        tablaCatedraticos.innerHTML = "";
+
+
+        universidad.catedraticos.forEach(function(catedratico) {
+
+            tablaCatedraticos.innerHTML += `
+
+                <tr>
+
+                    <td>${catedratico.codigo}</td>
+
+                    <td>${catedratico.nombre}</td>
+
+                    <td>${catedratico.genero}</td>
+
+                    <td>${catedratico.correo}</td>
+
+                </tr>
+
+            `;
+
+        });
+
+    }
+
+
+    // =========================================
+    // MOSTRAR DATOS AL ABRIR LA PAGINA
+    // =========================================
+
+    mostrarListas();
+
+</script>
+
+</body>
+
+</html>
